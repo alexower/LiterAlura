@@ -1,9 +1,15 @@
 package com.alura.literatura.models;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import org.springframework.core.annotation.AliasFor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-public record Book(
-        @JsonAlias("title") String titulo,
-        @JsonAlias("title") List<Autores> autor) {
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record DataBook(
+                              String title,
+        @JsonAlias("authors") List<DataAuthor> author,
+                              List<String> languages,
+        @JsonAlias("download_count") Double downloads) {
+
 }
