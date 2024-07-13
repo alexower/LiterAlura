@@ -42,6 +42,10 @@ Books-Search es una aplicación Java diseñada para gestionar y buscar libros y 
     
 ![Texto alternativo](https://raw.githubusercontent.com/alexower/LiterAlura/main/img/CapturaConsole.jpg)
 
+## API utilizada
+
+Este proyecto utiliza la [API de Gutendex](https://gutendex.com/) para acceder a una base de datos de libros del Proyecto Gutenberg.
+La API permite buscar, obtener detalles y acceder a los textos completos de libros disponibles gratuitamente.
 
 ## Contribuciones
 
