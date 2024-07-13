@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "authors")
@@ -14,8 +15,10 @@ public class Author {
     private Long id ;
     @Column(unique = true)
     private String name;
-    private String birth_year;
-    private String death_year;
+    @Column(name = "birth_year")
+    private Integer birth_year;
+    @Column(name = "death_year")
+    private Integer death_year;
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<Book> books;
 
@@ -28,6 +31,16 @@ public class Author {
         this.books = new ArrayList<>();
     }
 
+    @Override
+    public String toString() {
+        return
+                "----------------------------------\n"+
+                "Author     = " + name + "\n"+
+                "Birth year = " + birth_year + "\n"+
+                "Death year = " + death_year + "\n"+
+                "Books      = [" + books.stream().map(Book::getTitle).collect(Collectors.joining())+"]";
+
+    }
 
     public Long getId() {
         return id;
@@ -45,19 +58,19 @@ public class Author {
         this.name = name;
     }
 
-    public String getBirth_year() {
+    public Integer getBirth_year() {
         return birth_year;
     }
 
-    public void setBirth_year(String birth_year) {
+    public void setBirth_year(Integer birth_year) {
         this.birth_year = birth_year;
     }
 
-    public String getDeath_year() {
+    public Integer getDeath_year() {
         return death_year;
     }
 
-    public void setDeath_year(String death_year) {
+    public void setDeath_year(Integer death_year) {
         this.death_year = death_year;
     }
 

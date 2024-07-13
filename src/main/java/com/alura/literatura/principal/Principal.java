@@ -8,6 +8,7 @@ import com.alura.literatura.service.ConvierteDatos;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -33,14 +34,15 @@ public class Principal {
     public void mostarMenu(){
         String menu = """
                     *************************************
-                            Welcome to Books-Searh\s
+                    *        Welcome to Books-Searh\s   *
+                    *************************************
                     Seleccione una opcion:\s
                     1. Buscar libro
                     2. Mostar libros registrados
                     3. Mostar Autores registardos
-                    4. Listar Autores vivos en determinado ano
+                    4. Listar Autores vivos en determinado año
                     5. Mostar libros por idiomas
-                    *************************************
+                    
                     """;
         boolean continuar = true;
         while (continuar){
@@ -55,9 +57,9 @@ public class Principal {
                     case 3:
                         mostarAuthors();break;
                     case 4:
-                        break;
+                        mostarAuthorByAge();break;
                     case 5:
-                        break;
+                        mostarBylanguage();break;
                     case 0 :
                         continuar = false;
                         break;
@@ -69,8 +71,7 @@ public class Principal {
             }
         }
         }
-    @Transactional
-
+        @Transactional
     public Data getdata(){
         System.out.println("Titulo que quieres buscar: ");
         var consulta = teclado.next();
@@ -78,6 +79,7 @@ public class Principal {
         Data data = convertidor.obtenerDatos(json,Data.class);
         return data;
     }
+
     public void searhBook(){
         Data datos = getdata();
         //verifcar si no se encontro nada en la api
@@ -94,18 +96,25 @@ public class Principal {
         }
         //save data author
         DataAuthor dataAuthor = dataBook.author().get(0);
-        Author author = new Author(dataAuthor);
-        author = authorRepository.save(author);
+        Optional<Author> existingAuthor = authorRepository.findByName(dataAuthor.name());
+        Author author;
+        if (existingAuthor.isPresent()) {
+            author = existingAuthor.get();
+            System.out.println("Autor existente: [" + author.getName()+"]");
+        } else {
+            author = new Author(dataAuthor);
+            author = authorRepository.save(author);
+            System.out.println("Nuevo autor guardado: [" + author.getName()+"]");
+        }
         //save book
         Book book = new Book(dataBook, author);
         book = bookRepository.save(book);
-        System.out.println("Libro guardado: [" + book.getTitle()+"]");
+        System.out.println("\nLibro guardado: [" + book.getTitle()+"]");
     }
 
-    //mostrar libros de BD
     public void mostarLibros() {
         List<Book> books = bookRepository.findAll();
-        System.out.println("----LIBROS GUARDADOS----");
+        System.out.println("\n    LIBROS GUARDADOS   ");
         String bookString = books.stream()
                 .map(Book::toString)
                 .collect(Collectors.joining("\n"));
@@ -114,27 +123,54 @@ public class Principal {
 
     public void  mostarAuthors(){
         List<Author> authors = authorRepository.findAll();
-        System.out.println("----AUTORES GUARDADOS----");
-        String formattedAuthors = authors.stream()
-                .map(author -> String.format(
-                        "Nombre      = '%s'\n" +
-                                "Birth_year  = %s\n" +
-                                "Death_year  = %s\n" +
-                                "Books       =[%s]\n",
-                        author.getName(),
-                        author.getBirth_year(),
-                        author.getDeath_year(),
-                        author.getBooks().stream()
-                                .map(Book::getTitle)
-                                .collect(Collectors.joining(", "))
-                ))
+        System.out.println("\n     AUTORES GUARDADOS      ");
+        String authorsString = authors.stream()
+                .map(Author::toString)
                 .collect(Collectors.joining("\n"));
-
-        System.out.println(formattedAuthors);
+        System.out.println(authorsString);
     }
 
+    public void mostarAuthorByAge() {
+        System.out.println("Ingrese el año [yyyy]: ");
+        var year = Integer.parseInt(tecladoNumero.next());
+        try {
+            List<Author> authores = authorRepository.findAuthorNamesAliveInYear(year);
+            if (authores.isEmpty()) {
+                System.out.println("No hay autores de esa fecha");
+                return;
+            }
+            System.out.println("\n   Autores del año: " + year);
+            String authorsString = authores.stream()
+                    .map(Author::toString)
+                    .collect(Collectors.joining("\n"));
+            System.out.println(authorsString);
+        }catch (NumberFormatException e){
+            System.out.println("Ingrese un numero!");
+        }
 
+    }
 
+    public void mostarBylanguage(){
+        String idiomas = """
+                         Espanol   - es
+                         Ingles    - en
+                         Frances   - fr
+                         Portugues - pt
+                         """;
+        System.out.println("Ingrese el idioma:");
+        System.out.println(idiomas);
+        var language = teclado.next();
+        List<Book> books = bookRepository.buscarBylanguage(language.toLowerCase());
+        if (books.isEmpty()) {
+            System.out.println("Libros en ese idioma no disponoble");
+            return;
+        }
+        System.out.println("\n    Libros en: "+ language);
+        String authorsString = books.stream()
+                .map(Book::toString)
+                .collect(Collectors.joining("\n"));
+        System.out.println(authorsString);
+    }
 
     }
 

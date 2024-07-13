@@ -34,10 +34,10 @@ public class Book {
     @Override
     public String toString() {
         return
-                "****************************\n"+
-                " Libro    = " + title + "\n" +
+                "--------------------------------\n"+
+                " Libro     = " + title + "\n" +
                 " Autor     = " + nameAuthor + "\n" +
-                " Lenguaje  =  " + language + "\n" +
+                " Lenguaje  = " + language + "\n" +
                 " Descargas = " + downloads;
     }
 
